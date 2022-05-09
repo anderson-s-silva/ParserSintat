@@ -13,7 +13,7 @@ public class ParserSintat {
 		if(arraytoken.get(0).getnome() == TipoToken.Delim) {
 			System.out.println("VALIDOU primeiro DELIM");
 		}else{
-			System.out.println("ERROR primeiro DELIM");
+			System.out.println("ERROR primeiro DELIM na linha ");
 			System.exit(1);
 		}
 		if(arraytoken.get(1).getnome() == TipoToken.PCDec) {
@@ -23,7 +23,7 @@ public class ParserSintat {
 			System.exit(1);
 		}
 		if(arraytoken.get(2).getnome() == TipoToken.Delim){
-			System.out.println("ERROR: sem declaracoes");
+			System.out.println("ERROR: sem declaracoes na linha " + Integer.toString(arrayListaComandos.get(0).getlinha()));
 			System.exit(1);
 		}
 		for(int i = 2; i < arraytoken.size(); i++) { 
@@ -37,20 +37,20 @@ public class ParserSintat {
 			
 		}
 		if(aux +1 == arraytoken.size()) {
-			System.out.println("ERROR: sem LISTACOMANDOS");
+			System.out.println("ERROR: sem LISTACOMANDOS na linha " + Integer.toString(arrayListaComandos.get(0).getlinha()));
 			System.exit(1);
 		}
 		for(int i = aux+2; i < arraytoken.size(); i++) {
 			arrayListaComandos.add(arraytoken.get(i));
 		}
 		if(listaDeclaracoes(arrayCompare) == false){
-			System.out.println("ERROR: listaDeclaracao");
+			System.out.println("ERROR: listaDeclaracao na linha " + Integer.toString(arrayCompare.get(0).getlinha()));
 			System.exit(1);
 		}else {
 			System.out.println("VALIDOU LISTADECLARACAO");
 		}
 		if(listaComandos(arrayListaComandos) == false) {
-			System.out.println("ERROR: listaComandos");
+			System.out.println("ERROR: listaComandos na linha " + Integer.toString(arrayListaComandos.get(0).getlinha()));
 			System.exit(1);
 		}else {
 			System.out.println("VALIDOU LISTACOMANDOS");
@@ -75,9 +75,22 @@ public class ParserSintat {
 	
 	public boolean declaracao(ArrayList<Token> arrayDeclaracao) {
 		boolean retorno = false;
-		if(arrayDeclaracao.get(0).getnome() == TipoToken.Var)
-			if(arrayDeclaracao.get(1).getnome() == TipoToken.Delim)
-				if(arrayDeclaracao.get(2).getnome() == TipoToken.PCReal || arrayDeclaracao.get(2).getnome() == TipoToken.PCInt) retorno = true;
+		if(arrayDeclaracao.get(0).getnome() == TipoToken.Var) {
+			if(arrayDeclaracao.get(1).getnome() == TipoToken.Delim) {
+				if(arrayDeclaracao.get(2).getnome() == TipoToken.PCReal || arrayDeclaracao.get(2).getnome() == TipoToken.PCInt) {
+					retorno = true;
+				}else {
+					System.out.println("ERROR: Esperado PCReal ou PCInt na linha " + Integer.toString(arrayDeclaracao.get(0).getlinha()));
+					System.exit(1);
+				}
+			}else {
+				System.out.println("ERROR: Esperado Token Delim na linha " + Integer.toString(arrayDeclaracao.get(0).getlinha()));
+				System.exit(1);
+			}
+		}else {
+			System.out.println("ERROR: Esperado TipoVar na linha " + Integer.toString(arrayDeclaracao.get(0).getlinha()));
+			System.exit(1);
+		}
 		return retorno;
 	}
 	
@@ -88,6 +101,7 @@ public class ParserSintat {
 			if(listaComandos(arrayListaComandos))
 				retorno = true;
 		}
+		
 		return retorno;
 	}
 	
@@ -125,6 +139,9 @@ public class ParserSintat {
 			if(arrayListaComandos.get(0).getnome() == TipoToken.Atrib) {
 				arrayListaComandos.remove(0);
 				retorno = true;
+			}else{
+				System.out.println("ERROR: Inesperado Token na linha " + Integer.toString(arrayListaComandos.get(0).getlinha()));
+				System.exit(1);
 			}
 		}
 		if(retorno == true) {
@@ -183,9 +200,14 @@ public class ParserSintat {
 			}
 			if(arrayListaComandos.get(0).getnome() == TipoToken.PCEntao && arrayListaComandos.get(0).getlinha() == linha) arrayListaComandos.remove(0);
 			else return false;
+
 			if(expressaoRelacional(arrayComandoCondicao)) {
+				if(!arrayComandoCondicao.isEmpty()) {
+					System.out.println("ERROR: INESPERADO LEXEMA: " + arrayComandoCondicao.get(0).getnome() + " na linha " + Integer.toString(arrayComandoCondicao.get(0).getlinha()));
+					System.exit(1);
+				}
 				if(arrayListaComandos.isEmpty()) {
-					System.out.println("ERROR: É ESPERADO UM COMANDO APÓS ENTAO");
+					System.out.println("ERROR: Ã‰ ESPERADO UM COMANDO APÃ“S ENTAO na linha " + Integer.toString(arrayListaComandos.get(0).getlinha()));
 					System.exit(1);
 				}
 				if(comando(arrayListaComandos)) 
@@ -240,7 +262,7 @@ public class ParserSintat {
 				if(listaComandos(arraySubAlg))
 					retorno = true;
 			}else {
-				System.out.println("ERROR subAlg linha 229 code");
+				System.out.println("ERROR no SUBALG na linha " + Integer.toString(arrayListaComandos.get(0).getlinha()));
 				System.exit(1);
 			}
 		}
@@ -285,7 +307,7 @@ public class ParserSintat {
 	}
 	
 	public boolean termoRelacionalL(ArrayList<Token> arrayListaComandos) {
-		boolean retorno = true;
+		boolean retorno = false;
 		if(arrayListaComandos.isEmpty()) return true;
 		if(operadorRelacional(arrayListaComandos)) {
 			if(expressaoArit(arrayListaComandos)) {
@@ -294,7 +316,7 @@ public class ParserSintat {
 					System.out.println("VALIDOU TERMORELACIONAL LINHA");
 				}
 			}
-		}
+		}else retorno = palavraVazia;
 		return retorno; //palavra vazia
 	}
 	
@@ -333,12 +355,14 @@ public class ParserSintat {
 		boolean retorno = false;
 		if(arrayListaComandos.get(0).getnome() == TipoToken.OpBoolE) {
 			arrayListaComandos.remove(0);
+			retorno = true;
 		}else if(arrayListaComandos.get(0).getnome() == TipoToken.OpBoolOu) {
 			arrayListaComandos.remove(0);
-		}else {
-			System.out.println("ERROR: OPBOOL");
+			retorno = true;
+		}/*else {
+			System.out.println("ERROR: OPBOOL na linha " + Integer.toString(arrayListaComandos.get(0).getlinha()));
 			System.exit(1);
-		}
+		}*/
 		return retorno;
 	}
 	
@@ -348,7 +372,7 @@ public class ParserSintat {
 		if(termoArit(arrayListaExpressao)) 
 			if(expressaoAritL(arrayListaExpressao)) {
 				retorno = true;
-				System.out.println("Exp arit valida");
+				System.out.println("VALIDOU EXPRESSAOARIT");
 		}
 		return retorno;
 	}
@@ -388,12 +412,12 @@ public class ParserSintat {
 				}
 			}
 			if(!fechaPar) {
-				System.out.println("Esperado Parêntese na linha " + Integer.toString(linha));
+				System.out.println("Esperado Token FechaPar na linha " + Integer.toString(linha));
 				System.exit(1);
 			}
 			if(expressaoArit(arrayFatorArit)) retorno = true;
 		} else if(arrayListaExpressao.get(0).getnome() == TipoToken.FechaPar) {
-			System.out.println("Inesperado Parêntese na linha " + Integer.toString(arrayListaExpressao.get(0).getlinha()));
+			System.out.println("Inesperado Token FechaPar na linha " + Integer.toString(arrayListaExpressao.get(0).getlinha()));
 			System.exit(1);
 		}
 		
@@ -409,7 +433,7 @@ public class ParserSintat {
 			arrayListaExpressao.remove(0);
 			if(fatorArit(arrayListaExpressao)) termoAritL(arrayListaExpressao);
 		}else if(arrayListaExpressao.get(0).getnome() == TipoToken.FechaPar) {
-			System.out.println("Inesperado Parêntese na linha " + Integer.toString(arrayListaExpressao.get(0).getlinha()));
+			System.out.println("Inesperado Token FechaPar na linha " + Integer.toString(arrayListaExpressao.get(0).getlinha()));
 			System.exit(1);
 		}
 		return palavraVazia;
@@ -428,6 +452,8 @@ public class ParserSintat {
 			if(termoArit(arrayListaExpressao))
 				if(expressaoAritL(arrayListaExpressao))
 					retorno = true;
+		}else {
+			retorno = palavraVazia;
 		}
 		return retorno;
 	}
